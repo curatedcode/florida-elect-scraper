@@ -1,32 +1,37 @@
 {
 	"name": "florida-elect-scraper",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"type": "module",
-	"description": "This is an example of a Crawlee project.",
+	"description": "A web scraping tool to extract and compile Florida election financial contribution data, automatically combining duplicate contributors to show total donation amounts.",
 	"dependencies": {
 		"camoufox-js": "^0.3.0",
 		"crawlee": "^3.0.0",
-		"playwright": "*"
+		"lodash": "^4.17.21",
+		"papaparse": "^5.5.2",
+		"playwright": "*",
+		"sanitize-filename": "^1.6.3"
 	},
 	"devDependencies": {
 		"@apify/tsconfig": "^0.1.0",
 		"@biomejs/biome": "1.9.4",
 		"@types/fs-extra": "^11",
+		"@types/lodash": "^4.17.16",
 		"@types/node": "^22.0.0",
+		"@types/papaparse": "^5.3.15",
 		"fs-extra": "^11.3.0",
 		"tsx": "^4.4.0",
 		"typescript": "~5.8.0"
 	},
 	"scripts": {
-		"start": "npm run start:dev",
-		"start:prod": "node dist/main.js",
-		"start:dev": "tsx src/main.ts",
+		"start": "pnpm run start:dev",
+		"start:prod": "node dist/index.js",
+		"start:dev": "tsx src/index.ts",
 		"build": "pnpm lint && tsc",
 		"test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1",
 		"get-binaries": "camoufox-js fetch",
 		"postinstall": "npm run get-binaries",
 		"lint": "biome check --write ."
 	},
-	"author": "It's not you it's me",
-	"license": "ISC"
+	"author": "curatedcode",
+	"license": "MIT"
 }
