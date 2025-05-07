@@ -28,6 +28,7 @@
 		"start:prod": "node dist/index.js",
 		"scrape:con": "tsx src/contributions/index.ts",
 		"scrape:sen": "tsx src/senators/index.ts",
+		"scrape:ele": "tsx src/elections/index.ts",
 		"build": "pnpm lint && tsc",
 		"get-binaries": "camoufox-js fetch",
 		"postinstall": "npm run get-binaries",

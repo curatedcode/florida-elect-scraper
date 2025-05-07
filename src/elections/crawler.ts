@@ -12,7 +12,7 @@ import sanitize from "sanitize-filename";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const storagePath = path.join(__dirname, "../../", "storage/contributions");
+const storagePath = path.join(__dirname, "../../", "storage/elections");
 
 export const crawler = async (
 	requests: (string | Request | RequestOptions)[],
@@ -35,41 +35,28 @@ export const crawler = async (
 				const title = await page.title();
 				log.info(`${title}`, { url: request.loadedUrl });
 
-				await page.locator("select[name='election']").selectOption("All");
-
-				await page
-					.locator("input[name='CanFName']")
-					.fill(request.userData.first);
-				await page
-					.locator("input[name='CanLName']")
-					.fill(request.userData.last);
-
-				await page
-					.locator("input[name='search_on'][type='radio'][value='2']")
-					.click();
-
-				await page.locator("input[name='rowlimit']").clear();
-
-				await page.locator("input[name='queryformat'][value='2']").click();
+				if (!request.userData.electionDate) {
+					throw new Error("Election date is missing in userData");
+				}
 
 				const downloadPromise = page.waitForEvent("download");
 
-				await page.getByRole("button", { name: "Submit" }).click();
+				await page.getByRole("button", { name: "Download" }).click();
 
-				const fileSafeFirstName = sanitize(request.userData.first);
-				const fileSafeLastName = sanitize(request.userData.last);
+				const sanitizedElectionDate = sanitize(request.userData.electionDate);
 
 				const filePath = path.join(
 					storagePath,
 					"datasets/downloads",
-					`${fileSafeFirstName}-${fileSafeLastName}.txt`,
+					`election-results-${sanitizedElectionDate}.txt`,
 				);
 
 				const download = await downloadPromise;
 				await download.saveAs(filePath);
 
 				await pushData({
-					name: request.userData,
+					electionDate: request.userData.electionDate,
+					rawFile: filePath,
 				});
 			},
 		},

@@ -11,7 +11,7 @@ export async function formatForContributionsScrape() {
 	const datasetDir = path.join(storagePath, "senators/datasets/default");
 	const files = await fs.readdir(datasetDir);
 
-	const formattedData: { first: string; last: string }[] = [];
+	const formattedData: string[] = [];
 
 	for (const filename of files) {
 		const filePath = path.join(datasetDir, filename);
@@ -19,13 +19,12 @@ export async function formatForContributionsScrape() {
 		const jsonData = JSON.parse(fileContents) as { senators: Senator[] };
 
 		for (const senator of jsonData.senators) {
-			const firstName = senator.name.split(" ")[1];
-			const lastName = senator.name.split(" ")[0];
+			const nameSplit = senator.name.split(" ");
 
-			formattedData.push({
-				first: firstName,
-				last: lastName,
-			});
+			const firstName = nameSplit[1];
+			const lastName = nameSplit[0];
+
+			formattedData.push(`${firstName} ${lastName}`);
 		}
 	}
 

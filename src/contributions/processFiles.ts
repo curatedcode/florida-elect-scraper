@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import path, { extname, join } from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import _ from "lodash";
 import Papa from "papaparse";
@@ -42,10 +42,10 @@ export async function processFiles({
 		const files = await fs.readdir(inputFolder);
 
 		for (const file of files) {
-			const fullPath = join(inputFolder, file);
+			const fullPath = path.join(inputFolder, file);
 
 			const fileStat = await fs.stat(fullPath);
-			if (fileStat.isFile() && extname(file) === ".txt") {
+			if (fileStat.isFile() && path.extname(file) === ".txt") {
 				console.log(`Processing file: ${file}`);
 				const textData = await fs.readFile(fullPath, "utf8");
 
@@ -102,8 +102,8 @@ export async function processFiles({
 
 				const outputFolder = path.join(storagePath, "datasets/downloads");
 
-				const outputPathJson = join(outputFolder, jsonOutputFileName);
-				const outputPathCsv = join(outputFolder, csvOutputFileName);
+				const outputPathJson = path.join(outputFolder, jsonOutputFileName);
+				const outputPathCsv = path.join(outputFolder, csvOutputFileName);
 
 				for (const type of new Set(outputType)) {
 					if (type === "json") {
