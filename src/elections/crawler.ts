@@ -1,26 +1,49 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { launchOptions } from "camoufox-js";
-import {
-	Configuration,
-	PlaywrightCrawler,
-	type Request,
-	type RequestOptions,
-} from "crawlee";
+import { Configuration, PlaywrightCrawler } from "crawlee";
 import { firefox } from "playwright";
 import sanitize from "sanitize-filename";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const storagePath = path.join(__dirname, "../../", "storage/elections");
+export type CrawlerArgs = {
+	/**
+	 * Dates to crawl.
+	 *
+	 * Need to be formatted "M/D/YYYY" no leading 0's in Month or Day.
+	 *
+	 * Defaults to ["11/5/2024"].
+	 */
+	dates?: string[];
+	/**
+	 * Storage path. Defaults to "storage/elections".
+	 *
+	 * Base starts at the level of `src` folder.
+	 */
+	outputDir?: string;
+};
 
-export const crawler = async (
-	requests: (string | Request | RequestOptions)[],
-	maxRequestsPerCrawl: number,
-) =>
-	new PlaywrightCrawler(
+export async function crawler({
+	dates = ["11/5/2024"],
+	outputDir = "storage/elections",
+}: CrawlerArgs = {}) {
+	const __filename = fileURLToPath(import.meta.url);
+	const __dirname = path.dirname(__filename);
+	const storagePath = path.join(__dirname, "../../", outputDir);
+
+	for (const date of dates) {
+		const month = date.split("/")[0];
+		const day = date.split("/")[1];
+
+		if (month[0] === "0" || day[0] === "0") {
+			throw new Error(
+				"Invalid date format. Month/Day should not have leading 0",
+			);
+		}
+	}
+
+	return new PlaywrightCrawler(
 		{
-			maxRequestsPerCrawl,
+			maxRequestsPerCrawl: dates.length + 1,
 			browserPoolOptions: {
 				useFingerprints: false,
 			},
@@ -65,4 +88,12 @@ export const crawler = async (
 				localDataDirectory: storagePath,
 			},
 		}),
-	).run(requests);
+	).run(
+		dates.map((date) => ({
+			url: `https://results.elections.myflorida.com/downloadresults.asp?ElectionDate=${date}&DATAMODE=`,
+			userData: {
+				electionDate: date,
+			},
+		})),
+	);
+}

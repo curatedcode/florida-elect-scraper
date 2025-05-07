@@ -84,97 +84,110 @@ interface ElectionData {
 	CanVotes: number;
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const storagePath = path.join(__dirname, "../../", "storage/elections");
+export type ProcessFilesArgs = {
+	/**
+	 * The path to the folder containing the elections .txt data files.
+	 *
+	 * Defaults to "storage/elections/downloads".
+	 *
+	 * Base starts at the level of `src` folder.
+	 */
+	inputDir?: string;
+	/**
+	 * The path to the folder where processed files will be saved.
+	 *
+	 * Defaults to "storage/elections/processed".
+	 *
+	 * Base starts at the level of `src` folder.
+	 */
+	outputDir?: string;
+};
 
-/**
- * @param inputFolder - The path to the folder containing the input .txt files
- */
-export async function processFiles(inputFolder: string) {
-	try {
-		console.log(`Processing files in: ${inputFolder}`);
-		const files = await fs.readdir(inputFolder);
+export async function processFiles({
+	inputDir = "storage/elections/downloads",
+	outputDir = "storage/elections/processed",
+}: ProcessFilesArgs = {}) {
+	const __filename = fileURLToPath(import.meta.url);
+	const __dirname = path.dirname(__filename);
 
-		for (const file of files) {
-			const fullPath = path.join(inputFolder, file);
+	console.log(`Processing files in: ${inputDir}`);
+	const files = await fs.readdir(inputDir);
 
-			const fileStat = await fs.stat(fullPath);
-			if (fileStat.isFile() && path.extname(file) === ".txt") {
-				console.log(`Processing file: ${file}`);
-				const textData = await fs.readFile(fullPath, "utf8");
+	for (const file of files) {
+		const fullPath = path.join(inputDir, file);
 
-				const result = Papa.parse<ElectionData>(textData, {
-					header: true,
-					delimiter: "\t",
-					skipEmptyLines: true,
-					dynamicTyping: false,
-					transformHeader: (header) => header.trim(),
-				});
+		const fileStat = await fs.stat(fullPath);
+		if (fileStat.isFile() && path.extname(file) === ".txt") {
+			console.log(`Processing file: ${file}`);
+			const textData = await fs.readFile(fullPath, "utf8");
 
-				if (result.errors && result.errors.length > 0) {
-					console.warn(`Parsing warnings for ${file}:`, result.errors);
-				}
+			const result = Papa.parse<ElectionData>(textData, {
+				header: true,
+				delimiter: "\t",
+				skipEmptyLines: true,
+				dynamicTyping: false,
+				transformHeader: (header) => header.trim(),
+			});
 
-				const grouped = _.chain(result.data)
-					.filter((item) => item.RaceCode === "STS")
-					.groupBy((item) => item.Juris1num)
-					.map((items) => {
-						const candidatesMerged = items.reduce<Record<string, ElectionData>>(
-							(acc, item) => {
-								const key = `${item.CanNameFirst} ${item.CanNameMiddle} ${item.CanNameLast}`;
+			if (result.errors && result.errors.length > 0) {
+				console.warn(`Parsing warnings for ${file}:`, result.errors);
+			}
 
-								if (acc[key]) {
-									acc[key].CanVotes += Number(item.CanVotes);
-								} else {
-									item.CanVotes = Number(item.CanVotes);
-									acc[key] = item;
-								}
+			const grouped = _.chain(result.data)
+				.filter((item) => item.RaceCode === "STS")
+				.groupBy((item) => item.Juris1num)
+				.map((items) => {
+					const candidatesMerged = items.reduce<Record<string, ElectionData>>(
+						(acc, item) => {
+							const key = `${item.CanNameFirst} ${item.CanNameMiddle} ${item.CanNameLast}`;
 
-								return acc;
-							},
-							{},
-						);
+							if (acc[key]) {
+								acc[key].CanVotes += Number(item.CanVotes);
+							} else {
+								item.CanVotes = Number(item.CanVotes);
+								acc[key] = item;
+							}
 
-						const _candidates = Object.entries(candidatesMerged).map(
-							([_, item]) => item,
-						);
+							return acc;
+						},
+						{},
+					);
 
-						const candidates = _candidates.map((item) => {
-							const withMiddleName = `${item.CanNameFirst} ${item.CanNameMiddle} ${item.CanNameLast}`;
-							const withoutMiddleName = `${item.CanNameFirst} ${item.CanNameLast}`;
+					const _candidates = Object.entries(candidatesMerged).map(
+						([_, item]) => item,
+					);
 
-							return {
-								name: item.CanNameMiddle ? withMiddleName : withoutMiddleName,
-								votes: item.CanVotes,
-								party: item.PartyCode,
-								district: Number(item.Juris1num),
-							};
-						});
+					const candidates = _candidates.map((item) => {
+						const withMiddleName = `${item.CanNameFirst} ${item.CanNameMiddle} ${item.CanNameLast}`;
+						const withoutMiddleName = `${item.CanNameFirst} ${item.CanNameLast}`;
 
 						return {
-							candidates,
-							district: candidates[0].district,
-							totalVotes: candidates.reduce((acc, item) => acc + item.votes, 0),
-							winner: candidates.sort((a, b) => b.votes - a.votes)[0],
+							name: item.CanNameMiddle ? withMiddleName : withoutMiddleName,
+							votes: item.CanVotes,
+							party: item.PartyCode,
+							district: Number(item.Juris1num),
 						};
-					})
-					.value();
+					});
 
-				const outputFolder = path.join(storagePath, "datasets/downloads");
-				const outputPathJson = path.join(
-					outputFolder,
-					file.replace(".txt", ".json"),
-				);
-				await fs.writeFile(outputPathJson, JSON.stringify(grouped, null, 2));
+					return {
+						candidates,
+						district: candidates[0].district,
+						totalVotes: candidates.reduce((acc, item) => acc + item.votes, 0),
+						winner: candidates.sort((a, b) => b.votes - a.votes)[0],
+					};
+				})
+				.value();
 
-				console.log(
-					`Processed ${file}: Found ${grouped.length} separate elections`,
-				);
-			}
+			const outputFolder = path.join(__dirname, "../../", outputDir);
+			const outputPathJson = path.join(
+				outputFolder,
+				file.replace(".txt", ".json"),
+			);
+			await fs.writeFile(outputPathJson, JSON.stringify(grouped, null, 2));
+
+			console.log(
+				`Processed ${file}: Found ${grouped.length} separate elections`,
+			);
 		}
-	} catch (err) {
-		console.error("Error while processing files:", err);
-		console.error(err instanceof Error ? err.stack : String(err));
 	}
 }

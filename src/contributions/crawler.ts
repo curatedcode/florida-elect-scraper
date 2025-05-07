@@ -1,26 +1,49 @@
+import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { launchOptions } from "camoufox-js";
-import {
-	Configuration,
-	PlaywrightCrawler,
-	type Request,
-	type RequestOptions,
-} from "crawlee";
+import { Configuration, PlaywrightCrawler } from "crawlee";
 import { firefox } from "playwright";
 import sanitize from "sanitize-filename";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const storagePath = path.join(__dirname, "../../", "storage/contributions");
+export type CrawlerArgs = {
+	/**
+	 * The names to scrape.
+	 *
+	 * Defaults to the `NAMES_TO_SCRAPE.json` file.
+	 */
+	names?: string[];
+	/**
+	 * Storage path. Defaults to "storage/contributions".
+	 *
+	 * Base starts at the level of `src` folder.
+	 */
+	outputDir?: string;
+};
 
-export const crawler = async (
-	requests: (string | Request | RequestOptions)[],
-	maxRequestsPerCrawl: number,
-) =>
-	new PlaywrightCrawler(
+export async function crawler({
+	names,
+	outputDir = "storage/contributions",
+}: CrawlerArgs = {}) {
+	const __filename = fileURLToPath(import.meta.url);
+	const __dirname = path.dirname(__filename);
+	const storagePath = path.join(__dirname, "../../", outputDir);
+
+	let namesToScrape: string[] = [];
+
+	if (names) {
+		namesToScrape = names;
+	} else {
+		const namesFile = await fs.readFile(
+			path.join(__dirname, "NAMES_TO_SCRAPE.json"),
+			"utf-8",
+		);
+		namesToScrape = JSON.parse(namesFile);
+	}
+
+	return new PlaywrightCrawler(
 		{
-			maxRequestsPerCrawl,
+			maxRequestsPerCrawl: namesToScrape.length,
 			browserPoolOptions: {
 				useFingerprints: false,
 			},
@@ -56,20 +79,19 @@ export const crawler = async (
 
 				await page.getByRole("button", { name: "Submit" }).click();
 
-				const fileSafeFirstName = sanitize(request.userData.first);
-				const fileSafeLastName = sanitize(request.userData.last);
+				const fileSafeName = sanitize(request.userData.name);
 
 				const filePath = path.join(
 					storagePath,
 					"datasets/downloads",
-					`${fileSafeFirstName}-${fileSafeLastName}.txt`,
+					`${fileSafeName}.txt`,
 				);
 
 				const download = await downloadPromise;
 				await download.saveAs(filePath);
 
 				await pushData({
-					name: request.userData,
+					name: request.userData.name,
 				});
 			},
 		},
@@ -78,4 +100,11 @@ export const crawler = async (
 				localDataDirectory: storagePath,
 			},
 		}),
-	).run(requests);
+	).run(
+		namesToScrape.map((name) => ({
+			url: "https://dos.elections.myflorida.com/campaign-finance/contributions/#both",
+			userData: { name },
+			uniqueKey: name,
+		})),
+	);
+}

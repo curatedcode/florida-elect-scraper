@@ -1,8 +1,12 @@
 import { fileURLToPath } from "node:url";
-import { crawler } from "./crawler.js";
+import { type CrawlerArgs, crawler } from "./crawler.js";
 
-export async function run() {
-	await crawler.run(["https://www.flsenate.gov/Senators/"]);
+export type RunArgs = {
+	crawlerOptions?: CrawlerArgs;
+};
+
+export async function run({ crawlerOptions }: RunArgs = {}) {
+	await crawler(crawlerOptions);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
