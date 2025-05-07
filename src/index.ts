@@ -1,20 +1,19 @@
-import namesToScrape from "./NAMES_TO_SCRAPE.json" with { type: "json" };
-import { crawler } from "./crawler.js";
-import { processFiles } from "./processFiles.js";
+import { run as contributionsCrawler } from "./contributions/index.js";
+import { run as senatorCrawler } from "./senators/index.js";
 
-(async function main() {
-	await crawler
-		.run(
-			namesToScrape.map((name) => ({
-				url: "https://dos.elections.myflorida.com/campaign-finance/contributions/#both",
-				userData: name,
-				uniqueKey: `${name.first}-${name.last}`,
-			})),
-		)
-		.then(() => {
-			processFiles({
-				inputFolder: "storage/datasets/downloads",
-				outputType: ["json", "csv"],
-			});
-		});
+// biome-ignore lint/correctness/noUnusedImports: Leave in for fast switching
+import { formatForContributionsScrape } from "./senators/formatForContributionsScrape.js";
+
+(async () => {
+	await senatorCrawler().then(async () => {
+		/**
+		 * DEFAULT: Crawler will use the NAMES_TO_SCRAPE.json file
+		 */
+		await contributionsCrawler();
+
+		/**
+		 * Crawler will use the data from senatorCrawler()
+		 */
+		// await contributionsCrawler(await formatForContributionsScrape());
+	});
 })();

@@ -1,6 +1,6 @@
-import fs from "node:fs";
-import { readFile, readdir, stat } from "node:fs/promises";
-import { extname, join } from "node:path";
+import fs from "node:fs/promises";
+import path, { extname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import _ from "lodash";
 import Papa from "papaparse";
 
@@ -15,6 +15,10 @@ interface ContributionData {
 	Inkind: string;
 	Desc: string;
 }
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const storagePath = path.join(__dirname, "../../", "storage/contributions");
 
 export type ProcessFilesArgs = {
 	/**
@@ -35,15 +39,15 @@ export async function processFiles({
 }: ProcessFilesArgs) {
 	try {
 		console.log(`Processing files in: ${inputFolder}`);
-		const files = await readdir(inputFolder);
+		const files = await fs.readdir(inputFolder);
 
 		for (const file of files) {
 			const fullPath = join(inputFolder, file);
 
-			const fileStat = await stat(fullPath);
+			const fileStat = await fs.stat(fullPath);
 			if (fileStat.isFile() && extname(file) === ".txt") {
 				console.log(`Processing file: ${file}`);
-				const textData = await readFile(fullPath, "utf8");
+				const textData = await fs.readFile(fullPath, "utf8");
 
 				const result = Papa.parse<ContributionData>(textData, {
 					header: true,
@@ -96,23 +100,20 @@ export async function processFiles({
 				const jsonOutputFileName = file.replace(".txt", ".json");
 				const csvOutputFileName = file.replace(".txt", ".csv");
 
-				const outputFolder = `${process.cwd()}/storage/datasets/downloads`;
-
-				if (!fs.existsSync(outputFolder)) {
-					throw new Error(
-						"Output folder does not exist. It should have been created when the crawler ran.",
-					);
-				}
+				const outputFolder = path.join(storagePath, "datasets/downloads");
 
 				const outputPathJson = join(outputFolder, jsonOutputFileName);
 				const outputPathCsv = join(outputFolder, csvOutputFileName);
 
 				for (const type of new Set(outputType)) {
 					if (type === "json") {
-						fs.writeFileSync(outputPathJson, JSON.stringify(grouped, null, 2));
+						await fs.writeFile(
+							outputPathJson,
+							JSON.stringify(grouped, null, 2),
+						);
 						console.log(`Created JSON file: ${jsonOutputFileName}`);
 					} else {
-						fs.writeFileSync(outputPathCsv, Papa.unparse(grouped));
+						await fs.writeFile(outputPathCsv, Papa.unparse(grouped));
 						console.log(`Created CSV file: ${csvOutputFileName}`);
 					}
 				}

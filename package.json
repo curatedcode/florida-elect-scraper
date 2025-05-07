@@ -9,7 +9,8 @@
 		"lodash": "^4.17.21",
 		"papaparse": "^5.5.2",
 		"playwright": "*",
-		"sanitize-filename": "^1.6.3"
+		"sanitize-filename": "^1.6.3",
+		"zod": "^3.24.4"
 	},
 	"devDependencies": {
 		"@apify/tsconfig": "^0.1.0",
@@ -23,11 +24,11 @@
 		"typescript": "~5.8.0"
 	},
 	"scripts": {
-		"start": "pnpm run start:dev",
+		"start": "tsx src/index.ts",
 		"start:prod": "node dist/index.js",
-		"start:dev": "tsx src/index.ts",
+		"scrape:con": "tsx src/contributions/index.ts",
+		"scrape:sen": "tsx src/senators/index.ts",
 		"build": "pnpm lint && tsc",
-		"test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1",
 		"get-binaries": "camoufox-js fetch",
 		"postinstall": "npm run get-binaries",
 		"lint": "biome check --write ."
