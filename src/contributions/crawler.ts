@@ -74,10 +74,10 @@ export async function crawler({
 
 				await page
 					.locator("input[name='CanFName']")
-					.fill(request.userData.first);
+					.fill(request.userData.name.split(" ")[0].trim());
 				await page
 					.locator("input[name='CanLName']")
-					.fill(request.userData.last);
+					.fill(request.userData.name.split(" ")[1].trim());
 
 				await page
 					.locator("input[name='search_on'][type='radio'][value='2']")
