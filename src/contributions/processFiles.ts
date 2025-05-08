@@ -29,7 +29,7 @@ export type Contribution = {
 		street: string;
 		city: string;
 		state: string;
-		zipCode: number;
+		zipCode?: number;
 	}[];
 	occupations: string[];
 };
@@ -112,7 +112,8 @@ export async function processFiles({
 								street: item.Address,
 								city: splitAddress[0].trim(),
 								state: stateZip[0].trim(),
-								zipCode: Number(stateZip[1].trim()),
+								zipCode:
+									stateZip.length > 1 ? Number(stateZip[1].trim()) : undefined,
 							};
 						});
 
