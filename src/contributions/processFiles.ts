@@ -81,7 +81,6 @@ export async function processFiles({
 			const result = Papa.parse<ContributionData>(textData, {
 				header: true,
 				delimiter: "\t",
-				skipEmptyLines: true,
 				dynamicTyping: false,
 				transformHeader: (header) => header.trim(),
 			});
@@ -98,17 +97,24 @@ export async function processFiles({
 						Number(item.Amount),
 					);
 
-					const addresses: Contribution["addresses"] = items.map((item) => {
-						const splitAddress = item["City State Zip"].split(",");
-						const stateZip = splitAddress[1].trim().split(" ");
+					const addresses: (Contribution["addresses"][0] | undefined)[] =
+						items.map((item) => {
+							if (
+								item.Address.includes("*") ||
+								item["City State Zip"].includes("*")
+							)
+								return;
+							console.log(item);
+							const splitAddress = item["City State Zip"].split(",");
+							const stateZip = splitAddress[1].trim().split(" ");
 
-						return {
-							street: item.Address,
-							city: splitAddress[0].trim(),
-							state: stateZip[0].trim(),
-							zipCode: Number(stateZip[1].trim()),
-						};
-					});
+							return {
+								street: item.Address,
+								city: splitAddress[0].trim(),
+								state: stateZip[0].trim(),
+								zipCode: Number(stateZip[1].trim()),
+							};
+						});
 
 					const sortedByDate = items.sort(
 						(a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime(),
@@ -119,7 +125,9 @@ export async function processFiles({
 
 					return {
 						name: contributor,
-						addresses,
+						addresses: addresses.filter(
+							(i): i is Contribution["addresses"][0] => !!i,
+						),
 						date: {
 							earliest: sortedByDate[0].Date,
 							latest: sortedByDate[sortedByDate.length - 1].Date,
