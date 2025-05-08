@@ -5,6 +5,7 @@ import { launchOptions } from "camoufox-js";
 import { Configuration, PlaywrightCrawler } from "crawlee";
 import { firefox } from "playwright";
 import sanitize from "sanitize-filename";
+import { ensureDirExists } from "../ensureDirExists.js";
 
 export type CrawlerArgs = {
 	/**
@@ -80,12 +81,10 @@ export async function crawler({
 				await page.getByRole("button", { name: "Submit" }).click();
 
 				const fileSafeName = sanitize(request.userData.name);
+				const folder = path.join(storagePath, "datasets/downloads");
+				await ensureDirExists(folder);
 
-				const filePath = path.join(
-					storagePath,
-					"datasets/downloads",
-					`${fileSafeName}.txt`,
-				);
+				const filePath = path.join(folder, `${fileSafeName}.txt`);
 
 				const download = await downloadPromise;
 				await download.saveAs(filePath);

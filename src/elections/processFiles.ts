@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import _ from "lodash";
 import Papa from "papaparse";
+import { ensureDirExists } from "../ensureDirExists.js";
 
 interface ElectionData {
 	/**
@@ -88,7 +89,7 @@ export type ProcessFilesArgs = {
 	/**
 	 * The path to the folder containing the elections .txt data files.
 	 *
-	 * Defaults to "storage/elections/downloads".
+	 * Defaults to "storage/elections/datasets/downloads".
 	 *
 	 * Base starts at the level of `src` folder.
 	 */
@@ -96,7 +97,7 @@ export type ProcessFilesArgs = {
 	/**
 	 * The path to the folder where processed files will be saved.
 	 *
-	 * Defaults to "storage/elections/processed".
+	 * Defaults to "storage/elections/datasets/processed".
 	 *
 	 * Base starts at the level of `src` folder.
 	 */
@@ -118,8 +119,8 @@ export type Election = {
 };
 
 export async function processFiles({
-	inputDir = "storage/elections/downloads",
-	outputDir = "storage/elections/processed",
+	inputDir = "storage/elections/datasets/downloads",
+	outputDir = "storage/elections/datasets/processed",
 }: ProcessFilesArgs = {}) {
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = path.dirname(__filename);
@@ -193,6 +194,8 @@ export async function processFiles({
 				.value();
 
 			const outputFolder = path.join(__dirname, "../../", outputDir);
+			await ensureDirExists(outputFolder);
+
 			const outputPathJson = path.join(
 				outputFolder,
 				file.replace(".txt", ".json"),

@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import _ from "lodash";
 import Papa from "papaparse";
+import { ensureDirExists } from "../ensureDirExists.js";
 
 interface ContributionData {
 	"Candidate/Committee": string;
@@ -20,7 +21,7 @@ export type ProcessFilesArgs = {
 	/**
 	 * The path to the folder containing the elections .txt data files.
 	 *
-	 * Defaults to "storage/elections/downloads".
+	 * Defaults to "storage/elections/datasets/downloads".
 	 *
 	 * Base starts at the level of `src` folder.
 	 */
@@ -28,7 +29,7 @@ export type ProcessFilesArgs = {
 	/**
 	 * The path to the folder where processed files will be saved.
 	 *
-	 * Defaults to "storage/elections/processed".
+	 * Defaults to "storage/elections/datasets/processed".
 	 *
 	 * Base starts at the level of `src` folder.
 	 */
@@ -42,8 +43,8 @@ export type ProcessFilesArgs = {
 };
 
 export async function processFiles({
-	inputDir = "storage/contributions/downloads",
-	outputDir = "storage/contributions/processed",
+	inputDir = "storage/contributions/datasets/downloads",
+	outputDir = "storage/contributions/datasets/processed",
 	outputType = ["json"],
 }: ProcessFilesArgs = {}) {
 	const __filename = fileURLToPath(import.meta.url);
@@ -112,6 +113,7 @@ export async function processFiles({
 			const csvOutputFileName = file.replace(".txt", ".csv");
 
 			const outputFolder = path.join(__dirname, "../../", outputDir);
+			await ensureDirExists(outputFolder);
 
 			const outputPathJson = path.join(outputFolder, jsonOutputFileName);
 			const outputPathCsv = path.join(outputFolder, csvOutputFileName);

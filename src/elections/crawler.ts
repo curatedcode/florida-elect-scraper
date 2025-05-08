@@ -4,6 +4,7 @@ import { launchOptions } from "camoufox-js";
 import { Configuration, PlaywrightCrawler } from "crawlee";
 import { firefox } from "playwright";
 import sanitize from "sanitize-filename";
+import { ensureDirExists } from "../ensureDirExists.js";
 
 export type CrawlerArgs = {
 	/**
@@ -67,10 +68,11 @@ export async function crawler({
 				await page.getByRole("button", { name: "Download" }).click();
 
 				const sanitizedElectionDate = sanitize(request.userData.electionDate);
+				const folder = path.join(storagePath, "datasets/downloads");
+				await ensureDirExists(folder);
 
 				const filePath = path.join(
-					storagePath,
-					"datasets/downloads",
+					folder,
 					`election-results-${sanitizedElectionDate}.txt`,
 				);
 

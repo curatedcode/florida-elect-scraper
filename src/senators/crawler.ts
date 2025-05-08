@@ -27,14 +27,12 @@ export type CrawlerArgs = {
 	outputDir?: string;
 };
 
-export async function crawler({ outputDir }: CrawlerArgs = {}) {
+export async function crawler({
+	outputDir = "storage/senators",
+}: CrawlerArgs = {}) {
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = path.dirname(__filename);
-	const storagePath = path.join(
-		__dirname,
-		"../../",
-		outputDir ?? "storage/senators",
-	);
+	const storagePath = path.join(__dirname, "../../", outputDir);
 
 	return new PlaywrightCrawler(
 		{
