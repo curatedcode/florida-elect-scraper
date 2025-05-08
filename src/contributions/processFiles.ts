@@ -104,7 +104,7 @@ export async function processFiles({
 								item["City State Zip"].includes("*")
 							)
 								return;
-							console.log(item);
+
 							const splitAddress = item["City State Zip"].split(",");
 							const stateZip = splitAddress[1].trim().split(" ");
 
