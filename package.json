@@ -1,6 +1,6 @@
 {
 	"name": "florida-elect-scraper",
-	"version": "1.1.2",
+	"version": "2.0.0",
 	"type": "module",
 	"description": "A web scraping tool to extract and compile Florida election financial contribution data, automatically combining duplicate contributors to show total donation amounts.",
 	"dependencies": {
