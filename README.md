@@ -1,124 +1,160 @@
-A web scraping tool to extract and compile Florida election financial contribution data, automatically combining duplicate contributors to show total donation amounts.
+# Florida Elections Data Scraper
 
-# Overview
+A powerful web scraping tool built with Crawlee/Playwright, specifically designed to gather and process data about Florida elections, candidates, senators, and campaign contributions.
 
-Florida-Elect-Scraper automates the process of gathering campaign finance data from the Florida Division of Elections website. It identifies all contributions for specified names, consolidates multiple donations from the same contributor, and provides comprehensive reports of financial contributions.
+## 🔍 Overview
 
-# Features
+This tool allows you to scrape comprehensive data from Florida's election resources, including:
 
-- Scrapes Florida election contribution data based on specified names
-- Automatically combines duplicate contributor entries
-- Calculates total donation amounts per contributor
-- Exports results in structured format for further analysis
+- **Election Results**: Detailed vote counts by candidate, party, district, and county
+- **Campaign Contributions**: Financial contributions data with dates, amounts, and contributor information
+- **Senator Information**: Current Florida senators' profiles including district, party affiliation, and contact details
 
-# Installation
+## 🚀 Features
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/curatedcode/florida-elect-scraper.git
-   cd florida-elect-scrape
-   ```
+- **Highly Configurable**: Customizable input and output options
+- **Robust Data Collection**: Comprehensive data gathering for election analysis
+- **Multi-format Output**: Export data in JSON and/or CSV formats
+- **Organized Storage**: Structured data storage with configurable paths
 
-2. Install dependencies:
-   ```
-   pnpm install
-   ```
+## 🛠️ Installation
 
-# Configuration
+```bash
+# Clone the repository
+git clone https://github.com/curatedcode/florida-elect-scraper.git
 
-You can run all scrapers locally at the same time just run:
-	```
-	pnpm start
-	```
+# Navigate to the project directory
+cd florida-elect-scraper
 
-## Contributions Scraper
-
-Create a JSON file named `NAMES_TO_SCRAPE.json` in the `src/contributions` directory with the names you want to search for. The file should contain an array of name strings:
-
-```json
-[
-  { "first": "John", "last": "Smith" },
-  { "first": "Gary", "last": "Johnson" },
-	{ "first": "Bob", "last": "Brown" }
-]
+# Install dependencies
+pnpm install
 ```
 
-An example file is provided in the repository to help you get started.
+## 📊 Usage Examples
 
-### Usage
+### Scrape and Process Election Data
 
-1. Ensure your `NAMES_TO_SCRAPE.json` file is properly configured with the names you want to search.
+```typescript
+import { run } from './src/elections';
 
-2. Run the scraper:
-   ```
-   pnpm start:con
-   ```
+// Using default configuration (scrapes 11/5/2024 election data)
+await run();
 
-3. The script will:
-   - Launch a headless browser
-   - Visit the Florida Division of Elections campaign finance website
-   - Search for each name in your configuration file
-   - Extract contribution data
-   - Combine duplicate contributors
-   - Generate a report with total contribution amounts
+// Custom configuration
+await run({
+	crawlerOptions: {
+    dates: ['11/8/2022', '8/23/2022'],
+    outputDir: 'custom/output/path'
+  },
+  processOptions: {
+  	inputDir: 'custom/input/path',
+    outputDir: 'custom/output/path'
+	}
+})
+```
 
-### How it Works
+### Scraping Election Data
 
-1. **Initialization**: The application reads the names to scrape from the `NAMES_TO_SCRAPE.json` file.
+```typescript
+import { crawler } from './src/elections/crawler';
 
-2. **Web Scraping**: Using Playwright, the application navigates to the Florida Division of Elections website and searches for each name.
+// Using default configuration (scrapes 11/5/2024 election data)
+await crawler();
 
-3. **Data Extraction**: For each search result, the application extracts contribution data including contributor names, amounts, dates, and recipient information.
+// Custom configuration
+await crawler({
+  dates: ['11/8/2022', '8/23/2022'],
+  outputDir: 'custom/output/path'
+})
+```
 
-4. **Data Processing**: After extraction, the application identifies duplicate contributors and combines their contribution amounts.
+### Processing Election Files
 
-5. **Results**: The application outputs a comprehensive list of all contributors with their total contribution amounts.
+```typescript
+import { processFiles } from './src/elections/processFiles';
 
+// Using default configuration
+await processFiles();
 
-## Senator Scraper
+// Custom configuration
+await processFiles({
+  inputDir: 'custom/input/path',
+  outputDir: 'custom/output/path'
+});
+```
 
-No configuration needed. It automatically scrapes the data of sitting senators.
+### Scrape and Process Contribution Data
 
-Run the scraper:
-	```
-	pnpm start:sen
-	```
+```typescript
+import { run } from './src/contributions';
 
-### How it Works
+// Using names from default NAMES_TO_SCRAPE.json file
+await run();
 
-1. **Web Scraping**: Using Playwright, the application navigates to the Florida Senate website.
+// Custom configuration
+await run({
+	crawlerOptions: {
+    names: ['John Smith', 'Jane Doe'],
+    outputDir: 'custom/output/path'
+  },
+  processOptions: {
+  	inputDir: 'custom/input/path',
+    outputDir: 'custom/output/path'
+	}
+})
+```
 
-2. **Data Extraction**: For each senator, the application extracts first and last names, district number, picture, senate profile link, and party information.
+### Scraping Contributions Data
 
-3. **Data Processing**: After extraction, the application identifies duplicate contributors and combines their contribution amounts.
+```typescript
+import { crawler } from './src/contributions/crawler';
 
-4. **Results**: The application outputs a comprehensive list of all contributors with their total contribution amounts.
+// Using names from default NAMES_TO_SCRAPE.json file
+await crawler();
 
-# Note
+// Custom names list
+await crawler({
+  names: ['John Smith', 'Jane Doe'],
+  outputDir: 'custom/output/path'
+})
+```
 
-You can pipe in the output of the senator data into the contributions crawler. View `src/index.ts`. By default it uses `NAMES_TO_SCRAPE.json` for names to scrape.
+### Processing Contributions Files
 
-# Under the Hood
+```typescript
+import { processFiles } from './src/contributions/processFiles';
 
-- [Crawlee](https://crawlee.dev/) - Web scraping and crawling framework
-- [Playwright](https://playwright.dev/) - Browser automation library
-- [Camoufox-js](https://github.com/example/camoufox-js) - Browser fingerprint camouflaging
+// Using default configuration
+await processFiles();
 
-# Common Issues
+// Custom configuration
+await processFiles({
+  inputDir: 'custom/input/path',
+  outputDir: 'custom/output/path'
+});
+```
 
-- **Rate Limiting**: If you experience rate limiting, try increasing the delay between requests in the configuration.
-- **Website Structure Changes**: If any parts of the website structure changes, updates to the scraper may be needed.
+### Scraping Senator Data
 
-# Legal Considerations
+```typescript
+import { run } from './src/senators';
 
-This tool is designed for research and analysis purposes only. Please ensure your use complies with:
-- The Florida Division of Elections and Florida Senate website terms of service
-- Applicable laws regarding web scraping
-- Data privacy regulations
+// Default storage location
+await run();
 
-# Contributing
+// Custom storage location
+await run({
+  crawlerOptions: {
+		outputDir: 'custom/output/path'
+	}
+});
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 📝 License
+
+[MIT](LICENSE)
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -126,6 +162,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-# License
+## 📞 Contact
 
-This project is licensed under the MIT License
+For questions or support, please open an issue.
