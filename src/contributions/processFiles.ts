@@ -11,11 +11,28 @@ interface ContributionData {
 	Amount: string;
 	Typ: string;
 	"Contributor Name": string;
-	"Address City State Zip": string;
-	Occupation: string;
-	Inkind: string;
-	Desc: string;
+	Address: string;
+	"City State Zip": string;
+	Occupation: string | undefined;
+	"Inkind Desc": string | undefined;
 }
+
+export type Contribution = {
+	date: {
+		earliest: string;
+		latest: string;
+	};
+	totalAmount: number;
+	contributionCount: number;
+	name: string;
+	addresses: {
+		street: string;
+		city: string;
+		state: string;
+		zipCode: number;
+	}[];
+	occupations: string[];
+};
 
 export type ProcessFilesArgs = {
 	/**
@@ -74,37 +91,42 @@ export async function processFiles({
 			}
 
 			const grouped = _.chain(result.data)
-				.filter(
-					(item) =>
-						!!item["Contributor Name"] && item["Contributor Name"] !== "",
-				)
+				.filter((item) => !!item["Contributor Name"])
 				.groupBy((item) => item["Contributor Name"])
-				.map((items, contributor) => {
-					const totalContribution = _.sumBy(items, (item) => {
-						const amount = item.Amount;
+				.map((items, contributor): Contribution => {
+					const totalContribution = _.sumBy(items, (item) =>
+						Number(item.Amount),
+					);
 
-						if (!amount) {
-							console.warn("Missing amount for entry:", item);
-							return 0;
-						}
+					const addresses: Contribution["addresses"] = items.map((item) => {
+						const splitAddress = item["City State Zip"].split(",");
+						const stateZip = splitAddress[1].trim().split(" ");
 
-						const cleanAmount = amount.replace(/[$,]/g, "").trim();
-						const numAmount = Number.parseFloat(cleanAmount);
-
-						if (Number.isNaN(numAmount)) {
-							console.warn(
-								`Invalid amount value: "${amount}" for contributor ${contributor}`,
-							);
-							return 0;
-						}
-
-						return numAmount;
+						return {
+							street: item.Address,
+							city: splitAddress[0].trim(),
+							state: stateZip[0].trim(),
+							zipCode: Number(stateZip[1].trim()),
+						};
 					});
 
+					const sortedByDate = items.sort(
+						(a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime(),
+					);
+					const occupations = items
+						.map((item) => item.Occupation)
+						.filter((i): i is string => !!i);
+
 					return {
-						contributor,
-						totalContribution,
+						name: contributor,
+						addresses,
+						date: {
+							earliest: sortedByDate[0].Date,
+							latest: sortedByDate[sortedByDate.length - 1].Date,
+						},
+						totalAmount: totalContribution,
 						contributionCount: items.length,
+						occupations,
 					};
 				})
 				.value();

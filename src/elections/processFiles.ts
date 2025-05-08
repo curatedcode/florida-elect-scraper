@@ -112,10 +112,26 @@ export type Candidate = {
 };
 
 export type Election = {
-	candidates: Candidate[];
-	district: number;
+	date: string;
 	totalVotes: number;
+	candidates: Candidate[];
 	winner: Candidate;
+	race: {
+		code: string;
+		name: string;
+	};
+	counties: {
+		code: string;
+		name: string;
+	}[];
+	district: {
+		first: number;
+		second: number | undefined;
+		precincts: {
+			total: number;
+			reporting: number;
+		};
+	};
 };
 
 export async function processFiles({
@@ -151,7 +167,7 @@ export async function processFiles({
 			const grouped = _.chain(result.data)
 				.filter((item) => item.RaceCode === "STS")
 				.groupBy((item) => item.Juris1num)
-				.map((items) => {
+				.map((items): Election => {
 					const candidatesMerged = items.reduce<Record<string, ElectionData>>(
 						(acc, item) => {
 							const key = `${item.CanNameFirst} ${item.CanNameMiddle} ${item.CanNameLast}`;
@@ -168,25 +184,39 @@ export async function processFiles({
 						{},
 					);
 
-					const _candidates = Object.entries(candidatesMerged).map(
-						([_, item]) => item,
+					const candidates: Candidate[] = Object.entries(candidatesMerged).map(
+						([_key, item]) => {
+							const withMiddleName = `${item.CanNameFirst} ${item.CanNameMiddle} ${item.CanNameLast}`;
+							const withoutMiddleName = `${item.CanNameFirst} ${item.CanNameLast}`;
+
+							return {
+								name: item.CanNameMiddle ? withMiddleName : withoutMiddleName,
+								votes: item.CanVotes,
+								party: item.PartyCode,
+								district: Number(item.Juris1num),
+							};
+						},
 					);
-
-					const candidates = _candidates.map((item) => {
-						const withMiddleName = `${item.CanNameFirst} ${item.CanNameMiddle} ${item.CanNameLast}`;
-						const withoutMiddleName = `${item.CanNameFirst} ${item.CanNameLast}`;
-
-						return {
-							name: item.CanNameMiddle ? withMiddleName : withoutMiddleName,
-							votes: item.CanVotes,
-							party: item.PartyCode,
-							district: Number(item.Juris1num),
-						};
-					});
 
 					return {
 						candidates,
-						district: candidates[0].district,
+						district: {
+							first: Number(items[0].Juris1num),
+							second: Number(items[0].Juris2num),
+							precincts: {
+								total: items[0].Precincts,
+								reporting: items[0].PrecinctsReporting,
+							},
+						},
+						counties: items.map((i) => ({
+							code: i.CountyCode,
+							name: i.CountyName,
+						})),
+						date: items[0].ElectionDate,
+						race: {
+							code: items[0].RaceCode,
+							name: items[0].OfficeDesc,
+						},
 						totalVotes: candidates.reduce((acc, item) => acc + item.votes, 0),
 						winner: candidates.sort((a, b) => b.votes - a.votes)[0],
 					};
