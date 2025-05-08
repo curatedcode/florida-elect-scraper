@@ -103,6 +103,20 @@ export type ProcessFilesArgs = {
 	outputDir?: string;
 };
 
+export type Candidate = {
+	name: string;
+	votes: number;
+	party: string;
+	district: number;
+};
+
+export type Election = {
+	candidates: Candidate[];
+	district: number;
+	totalVotes: number;
+	winner: Candidate;
+};
+
 export async function processFiles({
 	inputDir = "storage/elections/downloads",
 	outputDir = "storage/elections/processed",
