@@ -5,6 +5,7 @@ import { launchOptions } from "camoufox-js";
 import { Configuration, PlaywrightCrawler } from "crawlee";
 import { firefox } from "playwright";
 import sanitize from "sanitize-filename";
+import { z } from "zod";
 import { ensureDirExists } from "../ensureDirExists.js";
 
 export type CrawlerArgs = {
@@ -39,7 +40,17 @@ export async function crawler({
 			path.join(__dirname, "NAMES_TO_SCRAPE.json"),
 			"utf-8",
 		);
-		namesToScrape = JSON.parse(namesFile);
+		const parsed = JSON.parse(namesFile);
+
+		const zodParsed = z.array(z.string()).safeParse(parsed);
+
+		if (!zodParsed.success) {
+			throw new Error(
+				`${__dirname}/NAMES_TO_SCRAPE.json is formatted incorrectly. Error: "${zodParsed.error.issues[0].message}"`,
+			);
+		}
+
+		namesToScrape = zodParsed.data;
 	}
 
 	return new PlaywrightCrawler(
