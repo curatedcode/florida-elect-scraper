@@ -204,8 +204,8 @@ export async function processFiles({
 							first: Number(items[0].Juris1num),
 							second: Number(items[0].Juris2num),
 							precincts: {
-								total: items[0].Precincts,
-								reporting: items[0].PrecinctsReporting,
+								total: Number(items[0].Precincts),
+								reporting: Number(items[0].PrecinctsReporting),
 							},
 						},
 						counties: items.map((i) => ({
