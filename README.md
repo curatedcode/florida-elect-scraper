@@ -134,6 +134,11 @@ await processFiles({
 });
 ```
 
+>Note: You can run the following command to combine the individual files into a single JSON file.
+```bash
+pnpm combineContributions
+```
+
 ### Scraping Senator Data
 
 ```typescript
