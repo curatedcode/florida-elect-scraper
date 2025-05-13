@@ -14,7 +14,7 @@ export type CrawlerArgs = {
 	 *
 	 * Defaults to the `NAMES_TO_SCRAPE.json` file.
 	 */
-	names?: string[];
+	names?: { fullName: string; shortName: string }[];
 	/**
 	 * Storage path. Defaults to "storage/contributions".
 	 *
@@ -31,7 +31,7 @@ export async function crawler({
 	const __dirname = path.dirname(__filename);
 	const storagePath = path.join(__dirname, "../../", outputDir);
 
-	let namesToScrape: string[] = [];
+	let namesToScrape: { fullName: string; shortName: string }[] = [];
 
 	if (names) {
 		namesToScrape = names;
@@ -42,7 +42,9 @@ export async function crawler({
 		);
 		const parsed = JSON.parse(namesFile);
 
-		const zodParsed = z.array(z.string()).safeParse(parsed);
+		const zodParsed = z
+			.array(z.object({ fullName: z.string(), shortName: z.string() }))
+			.safeParse(parsed);
 
 		if (!zodParsed.success) {
 			throw new Error(
@@ -74,10 +76,10 @@ export async function crawler({
 
 				await page
 					.locator("input[name='CanFName']")
-					.fill(request.userData.name.split(" ")[0].trim());
+					.fill(request.userData.name.shortName.split(" ")[0].trim());
 				await page
 					.locator("input[name='CanLName']")
-					.fill(request.userData.name.split(" ")[1].trim());
+					.fill(request.userData.name.shortName.split(" ")[1].trim());
 
 				await page
 					.locator("input[name='search_on'][type='radio'][value='2']")
@@ -91,7 +93,7 @@ export async function crawler({
 
 				await page.getByRole("button", { name: "Submit" }).click();
 
-				const fileSafeName = sanitize(request.userData.name);
+				const fileSafeName = sanitize(request.userData.name.fullName);
 				const folder = path.join(storagePath, "datasets/downloads");
 				await ensureDirExists(folder);
 
@@ -114,7 +116,7 @@ export async function crawler({
 		namesToScrape.map((name) => ({
 			url: "https://dos.elections.myflorida.com/campaign-finance/contributions/#both",
 			userData: { name },
-			uniqueKey: name,
+			uniqueKey: name.fullName,
 		})),
 	);
 }

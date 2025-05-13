@@ -106,6 +106,8 @@ await run({
 
 ### Scraping Contributions Data
 
+If you use a custom names list make sure the `shortName` is the name you want to search for. It must be formatted `"FIRST_NAME LAST_NAME"`.
+
 ```typescript
 import { crawler } from './src/contributions/crawler';
 
@@ -114,7 +116,10 @@ await crawler();
 
 // Custom names list
 await crawler({
-  names: ['John Smith', 'Jane Doe'],
+  names: [
+		{ fullName: "John Smith", shortName: "John Smith" },
+		{ fullName: "Jane Lane Port", shortName: "Jane Port" },
+	],
   outputDir: 'custom/output/path'
 })
 ```

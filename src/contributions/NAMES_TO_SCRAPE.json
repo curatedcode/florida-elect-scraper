@@ -1,39 +1,150 @@
 [
-	"Don Gaetz",
-	"Lisa Newell",
-	"Corey Simon",
-	"Daryl Parks",
-	"Tracie Davis",
-	"Vernon Parker",
-	"Tom Leek",
-	"George Hill",
-	"Stan McClain",
-	"Sylvain Dore",
-	"Blaise Ingoglia",
-	"Marilyn Holleran",
-	"Keith Truenow",
-	"Stephanie Dukes",
-	"Randy Fine",
-	"Vance Ahrens",
-	"Ed Hooper",
-	"Doris Carroll",
-	"Danny Burgess",
-	"Ben Braver",
-	"John Houman",
-	"Kristen Arrington",
-	"Jose Martinez",
-	"Ben Albritton",
-	"Phillip Carter",
-	"Erin Grall",
-	"Randy Aldieri",
-	"Gayle Harrell",
-	"Aaron Hawkins",
-	"Jonathan Martin",
-	"Christopher Proia",
-	"Barbara Sharief",
-	"Vincent Parlatore",
-	"Jason Pizzo",
-	"Imtiaz Mohammad",
-	"Bryan Avila",
-	"Charles Lewis"
+	{
+		"fullName": "Don Gaetz",
+		"shortName": "Don Gaetz"
+	},
+	{
+		"fullName": "Lisa Newell",
+		"shortName": "Lisa Newell"
+	},
+	{
+		"fullName": "Corey Simon",
+		"shortName": "Corey Simon"
+	},
+	{
+		"fullName": "Daryl Parks",
+		"shortName": "Daryl Parks"
+	},
+	{
+		"fullName": "Tracie Davis",
+		"shortName": "Tracie Davis"
+	},
+	{
+		"fullName": "Vernon Lee Parker",
+		"shortName": "Vernon Parker"
+	},
+	{
+		"fullName": "Tom Leek",
+		"shortName": "Tom Leek"
+	},
+	{
+		"fullName": "George Anthony 'T' Hill",
+		"shortName": "George Hill"
+	},
+	{
+		"fullName": "Stan McClain",
+		"shortName": "Stan McClain"
+	},
+	{
+		"fullName": "Sylvain Dore",
+		"shortName": "Sylvain Dore"
+	},
+	{
+		"fullName": "Blaise Ingoglia",
+		"shortName": "Blaise Ingoglia"
+	},
+	{
+		"fullName": "Marilyn Holleran",
+		"shortName": "Marilyn Holleran"
+	},
+	{
+		"fullName": "Keith Truenow",
+		"shortName": "Keith Truenow"
+	},
+	{
+		"fullName": "Stephanie L. Dukes",
+		"shortName": "Stephanie Dukes"
+	},
+	{
+		"fullName": "Randy Fine",
+		"shortName": "Randy Fine"
+	},
+	{
+		"fullName": "Vance Ahrens",
+		"shortName": "Vance Ahrens"
+	},
+	{
+		"fullName": "Ed Hooper",
+		"shortName": "Ed Hooper"
+	},
+	{
+		"fullName": "Doris H. Carroll",
+		"shortName": "Doris Carroll"
+	},
+	{
+		"fullName": "Danny Burgess",
+		"shortName": "Danny Burgess"
+	},
+	{
+		"fullName": "Ben Braver",
+		"shortName": "Ben Braver"
+	},
+	{
+		"fullName": "John Houman",
+		"shortName": "John Houman"
+	},
+	{
+		"fullName": "Kristen Arrington",
+		"shortName": "Kristen Arrington"
+	},
+	{
+		"fullName": "Jose Martinez",
+		"shortName": "Jose Martinez"
+	},
+	{
+		"fullName": "Ben Albritton",
+		"shortName": "Ben Albritton"
+	},
+	{
+		"fullName": "Phillip R. Carter",
+		"shortName": "Phillip Carter"
+	},
+	{
+		"fullName": "Erin Grall",
+		"shortName": "Erin Grall"
+	},
+	{
+		"fullName": "Randy J. Aldieri",
+		"shortName": "Randy Aldieri"
+	},
+	{
+		"fullName": "Gayle Harrell",
+		"shortName": "Gayle Harrell"
+	},
+	{
+		"fullName": "Aaron J. Hawkins",
+		"shortName": "Aaron Hawkins"
+	},
+	{
+		"fullName": "Jonathan Martin",
+		"shortName": "Jonathan Martin"
+	},
+	{
+		"fullName": "Christopher Proia",
+		"shortName": "Christopher Proia"
+	},
+	{
+		"fullName": "Barbara Sharief",
+		"shortName": "Barbara Sharief"
+	},
+	{
+		"fullName": "Vincent Parlatore",
+		"shortName": "Vincent Parlatore"
+	},
+	{
+		"fullName": "Jason Pizzo",
+		"shortName": "Jason Pizzo"
+	},
+	{
+		"fullName": "Imtiaz Mohammad",
+		"shortName": "Imtiaz Mohammad"
+	},
+	{
+		"fullName": "Bryan Avila",
+		"shortName": "Bryan Avila"
+	},
+	{
+		"fullName": "Charles A. Lewis",
+		"shortName": "Charles Lewis"
+	}
 ]
