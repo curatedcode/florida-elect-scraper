@@ -42,7 +42,7 @@ export async function combineContributions({
 		const textData = await fs.readFile(fullPath, "utf8");
 		const json = JSON.parse(textData);
 
-		const fileName = file.split(".")[0];
+		const fileName = file.replace(".json", "").trim();
 
 		combined[fileName] = json;
 	}
